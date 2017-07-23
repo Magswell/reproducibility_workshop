@@ -1,13 +1,27 @@
 ---
 title: "Developing a Workflow to Maximize Reproducibility and Research Impact: Managing Data, Computer Code, and Projects for Success"
-author: "John R. Fieberg & Althea A. ArchMiller"
-date: "4/11/2017"
+author: "Althea A. ArchMiller & John R. Fieberg"
+date: "7/12/2017"
 output: beamer_presentation
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
+
+## Developing a Workflow to Maximize Reproducibility and Research Impact: Managing Data, Computer Code, and Projects for Success
+
+Althea A. ArchMiller &  John R. Fieberg
+
+\centering
+\includegraphics[width=3in]{images/reproducible_humor_copy.png}
+\centering
+
+\textcolor{blue}{Before we begin, please open up the reproducible\_workshop project in RStudio and install these packages}:
+
+- knitr
+- ezknitr
+- devtools
 
 ## Why worry about reproducibility?
 
@@ -25,10 +39,12 @@ Working towards future reproducibility makes my code easier for my collaborators
 
 ## Why worry about reproducibility?
 
-“[Reproducibility] provides security, saves time, and forces me to be more thoughtful about my workflow.” - Ethan Young
+\centering
+\includegraphics[width=3.5in]{images/reproducibility_quote.png}
+\centering
 
 \begin{itemize}
-\item make your life easier!
+\item make your life easier! Now, and in the future
 \item collaborations
 \item broader research impact
 \item increased citations
@@ -36,21 +52,24 @@ Working towards future reproducibility makes my code easier for my collaborators
 \item grant and journal requirements
 \end{itemize}
 
+“[Reproducibility] provides security, saves time, and forces me to be more thoughtful about my workflow.” - Ethan Young
+
 ## Is my research reproducible?
 
-- Are your research documents stored in these formats?
-    - .csv
-    - .txt
-    - .pdf
-    - .html
-    - .R
-        - \textcolor{blue}{YES!}
-        
-    - .doc/.docx
-    - .sas
-    - .xls/.xlsx
-    - any other proprietary file format
-        - \textcolor{red}{NO!}
+What formats are your research documents stored in? \pause
+
+- .csv
+- .txt
+- .pdf
+- .html
+- .R/.Rdata
+    - \textcolor{blue}{YES - these are considered "reproducible"!} \pause
+    
+- .doc/.docx
+- .sas
+- .xls/.xlsx
+- any other proprietary file format
+    - \textcolor{red}{NO - these are not "reproducible"!}
 
 ## Is my research reproducible?
 
@@ -60,14 +79,21 @@ Working towards future reproducibility makes my code easier for my collaborators
     - Each program should focus on one main task or analysis
     - Don't rely on manual commenting/uncommenting
 
+\includegraphics[width=4in]{images/global_options.png}
+
+## Is my research reproducible?
+
+So, what's wrong here?
+
 ```{r, eval=F, echo=T}
-# What variables are significant?
+# Here, I want to know what variables are significant?
+#       I will try each variable in turn
 lm.out <- lm(weight ~ height, data = trial.data)
 remove(lm.out) # clear previous lm.out for each 
                #   new lm() definition above
 
 # Is the relationship significant? 
-#     (If not, clear and try a new regressor)
+#     (If not, clear and try a new variable)
 summary(lm.out)
 ```
 
@@ -82,20 +108,377 @@ summary(lm.out)
 
 "The point of having style guidelines is to have a common vocabulary of coding so people can concentrate on *what* you are saying, rather than on *how* you are saying it." - Google's R Style Guide
 
+## Is my research reproducible?
+
+Do you treat your data as read-only?
+
+- Don't use Excel, etc., to manipulate raw data
+- Use an R script for data processing
+    - Process data in one script, then save for loading into subsequent scripts
+- When archiving, provide both raw data and processing code
+
 ## Workshop Outline
 
 The goal for this workshop is to help you develop the tools to develop a workflow to maximize reproducibility, collaborations, and research impact.
 
-- RStudio Projects for organizing data, code, and output
-- R-Markdown and R-Oxygen for documenting your code
-- GitHub for version-control, collaborating and archiving
+1. RStudio Projects for organizing data, code, and output \pause
+2. R-Markdown and R-Oxygen with **knitr** for documenting your code and creating reproducible reports \pause
+3. GitHub for version-control, collaborating and archiving
 
-## Tips
+# 1. RStudio Projects for organizing data, code, and output
 
-- Don't use github with large files :-(
-- Create new projects in GitHub first, then sync them with RStudio
+## 1: Introduction to RStudio
 
-## Why R-Markdown for manuscripts?
+\includegraphics[width=4.5in]{images/rstudio_annotated.png}
+
+## 1: Introduction to RStudio
+
+\includegraphics[width=4.5in]{images/rstudio_overview.png}
+
+## 1: Introduction to RStudio
+
+\includegraphics[width=4.5in]{images/rstudio_overview2.png}
+
+## 1. RStudio Projects
+
+Think about a typical research project, maybe a dissertation chapter or an experiment that you've managed from data collection through publication. What are typical **folders** that you've used? \pause
+
+- Raw data
+- Processed data
+- Analysis scripts
+- Paper/Manuscript-related documents
+- Sharing documents ("transmittals")
+- Metadata
+- Maps or other deliverables
+
+RStudio Projects provide an opportunity for you to organize and manage all of these types of folders in **one place** in a way that **relatively links** everything together and **eases sharing**.\pause
+
+Up next, Activity 1!    
+
+## Activity 1: Data management and updating
+
+Here, we will read in and process three weeks of experimental data and do some preliminary analysis. Then, we will get a final (4th) week of data, which we will merge with the original data. 
+
+The goals are to:
+
+1. Be introduced to RStudio
+2. Create a framework for keeping data organized and up-to-date
+3. Automatically update our analyses based on the master dataset
+
+Context: Abundance data from ~75 invertebrate species sampled on various beaches along the Dutch coast. 
+
+*Zuur, A.F., E.N. Ieno, and G.M. Smith (2007) Analysing Ecological Data. Springer, New York.*
+
+## Activity 1: Data management and updating
+
+Before we begin today, we need sync your individual versions of the workshop documents with Althea's master branch:\pause
+
+1. Open RStudio and your reproducibility_workshop.rproj. (File > Open Project...)
+2. Open shell (Tools > Shell...)
+3. Type in exactly, then press enter:
+```{r shell1, eval=F, echo=T}
+$ git fetch upstream
+```
+4. Type in exactly, then press enter:
+```{r shell2, eval=F, echo=T}
+$ git checkout master
+``` 
+5.  Type in exactly, then press enter:
+```{r shell3, eval=F, echo=T}
+$ git merge upstream/master
+```
+
+## Activity 1: Data management and updating
+
+1. In the File window of RStudio, copy the **student_folders/student_template** folder. Rename the folder after yourself (or an alias).
+
+2. Open a new R Script file and save it to that new folder as **student_folders/yourname/activity1a_data_processing.R** \pause
+
+Activity Overview:
+
+1. We will read in first three weeks of data and combine them, process the data a little bit, and save the merged/processed data for analysis.
+
+2. We will save another new R Script file as **"activity1b_data_analysis.R"** and code/run some preliminary regression analysis.
+
+3. We will pretend to have just gotten the final week's data in and update everything in a "reproducible" way.
+    
+
+
+
+# 2. R-Markdown and R-Oxygen with knitr for documenting your code and creating reproducible reports
+
+## Overview of **knitr**
+
+\includegraphics[width=4.5in]{images/knitr_overview.png}
+
+## Why **knitr** for manuscripts?
+
+
+\centering
+\includegraphics[width=3in]{images/knitr_quote.png}
+\centering 
+
+\pause
 
 "I can do reproducible work in R (making me happy) and format the output report in Word (making my collaborators happy)" - Richard Layton http://rmarkdown.rstudio.com/articles_docx.html
 
+## Why **knitr** for manuscripts?
+
+Native R Scripts (.R extensions) (or any analysis code) are generally not designed for reading, but the **knitr** library has been designed for converting R scripts into readable reports, such as Word, PDF, and/or html documents.
+
+Not only do these types of reports help with collaborating, they provide a great framework for archiving your analyses and results.
+
+Example: https://conservancy.umn.edu/handle/11299/181607
+
+## Documenting Code: General tips
+
+- Consistent and meaningful naming conventions
+    + \textcolor{red}{a = b*c}
+    + weekly.pay = hours.worked*pay.rate (not cross-compatible)
+    + weekly_pay = hours_worked*pay_rate
+    + weeklyPay = hoursWorked*payRate \pause
+- Use YYYYMMDD or equivalent for dates
+
+\includegraphics[width=3in]{images/dissertation_data.png}
+
+## Documenting Code: R-Markdown
+
+R-Markdown combines \textcolor{blue}{markdown} language, which is "an easy-to-write plain text format" and embedded \textcolor{blue}{R code chunks} that are "run so their output can be included in the final document" [1] \pause
+
+\begin{columns}
+\begin{column}{0.48\textwidth}
+\includegraphics[width=2in]{images/rmd1.png}
+\end{column}
+\begin{column}{0.48\textwidth}
+\includegraphics[width=2in]{images/rmd2.png}
+\end{column}
+\end{columns}
+
+[1] www.rmarkdown.rstudio.com
+
+## Documenting code: R-Markdown
+
+Exercise 2a: Introduction to R-Markdown
+
+- File > New File > R Markdown...
+- Choose "html" - optionally put in a title and press "OK"
+- This R-Markdown template is ready to "knit" into an html as-is
+    + Click the blue Knit button 
+    + Save as **"student_folders/yourname/activity2a_intro_rmarkdown.Rmd"**
+    + View the resultant html
+- Take a few minutes to modify the .Rmd and view how the changes appear in the knit html document.
+    
+<https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf>
+
+## Documenting code: ezknitr
+
+What folder did the html end up in? \pause
+
+Now imagine if you wanted to keep the programs/scripts in a folder separate from reports (\textcolor{blue}{highly recommended!}). You can easily direct the output html file into a different folder using **ezknitr** package. \pause
+
+\small
+```{r ezknitr, eval=FALSE, echo=T}
+library(ezknitr)
+ezknit("student_folders/yourname/activity2a_intro_rmarkdown.Rmd",
+       out_dir = "student_folders/archmiller_a/reports", 
+       fig_dir = "figures",
+       keep_md = F)
+```
+
+*Note: When using ezknit, must manually save the .Rmd file before knitting!*
+
+## Documenting Code: R-Oxygen
+
+Instead of using the R-Markdown language, you can also use **pure R scripts** plus **Roxygen comments** (#') to create fully reproducible reports. \pause
+
+Benefit: The entire program can be written and run in the familiar R Script file, then "spun" into an html/Word/pdf document at any point.
+
+- Learning to code with R-Oxygen is arguably more natural since we already use # for commenting \pause
+    
+Additionally, use #+ to define and label R chunks like we did with the ```{r ...} code in the R-Markdown language.
+
+## Documenting Code: R-Oxygen
+
+Activity 2b: Introduction to R-Oxygen
+
+Here, we'll quickly convert "activity1b_data_analysis.R" into an html document.
+
+1. Open "activity1b_data_analysis.R" 
+2. Save As... "student_folder/yourname/activity2b_intro_roxygen.R"
+
+## LaTeX
+
+Another benefit of using knitr/Rmd/Roxygen for creating statistical reports is the nice interface with LaTeX equation syntax.
+
+**Activity 3. LaTeX Equations**
+
+1. Create a new .Rmd html document
+2. Save it as "student_folders/yourname/activity3_latex.Rmd"
+3. Create the following in the output html
+    + $\alpha + \beta = 2\theta$
+    + $\pi^2 = 9.86$
+    + $\sum_{i=1}^n \sqrt{i} = 42$ (advanced)
+4. When you "knit" remember to use ezknitr:
+
+\small
+```{r ezknitr2, eval=FALSE, echo=T}
+library(ezknitr)
+ezknit("student_folders/yourname/activity3_latex.Rmd",
+       out_dir = "student_folders/yourname/reports", 
+       fig_dir = "figures",
+       keep_md = F)
+```
+
+<https://tobi.oetiker.ch/lshort/lshort.pdf> (hint: tables on p75)
+
+## Project Workflow w/ RStudio & knitr
+
+Example project directory
+
+- data/
+    + raw_data/
+    + processed_data/
+    + output_data/
+- manuscript/
+    + ms_figures/
+    + transmissions/
+    + submission/
+- output/
+    + figures/
+- programs/
+- project_file.Rproj
+
+## Project Workflow w/ RStudio & knitr
+
+- **data/**
+    + **raw_data/**
+        + survey_data20161227.csv
+        + survey_data20161230.csv
+        + survey_data20170103.csv
+    + **processed_data/**
+        + survey_data_all.Rdata
+    + **output_data/**
+        + model_out.Rdata 
+        
+## Project Workflow w/ RStudio & knitr
+
+- **programs/**
+    + a_data_processing.R
+    + b_data_analysis.R
+    + c_plots.R 
+    
+## Project Workflow w/ RStudio & knitr
+
+- **output/**
+    + a_data_processing.html
+    + b_data_analysis.html
+    + c_plots.html
+    + **figures/**
+        + eda1.jpg
+        + scatter1.jpg
+        
+## Project Workflow w/ RStudio & knitr
+
+- **manuscript/**
+    + ms.Rmd
+    + ms.pdf
+    + ms.docx
+    + **ms_figures/**
+        + fig1.jpg
+        + fig2.jpg\pause
+    + **transmittals/** 
+        + **from_john/**
+        +   ms20170523.docx
+        +   ms20170625.docx
+        + **from_bob/**
+        +   ms20170626.docx \pause
+    + **submission/** 
+        + ms.pdf
+        + fig1.pdf
+        + fig2.pdf
+        + coverletter.docx
+        
+## Project Workflow w/ RStudio & knitr
+
+Example of an RStudio project that Althea & John used from conceptualization through publication. \pause
+
+### Activity 3: Creating a reproducible report using R-Markdown
+
+Tasks:
+
+1. Knit the rmd as is into a .doc file
+2. Add a third week of data and update report
+3. Change the formatting using the word-styles-reference-01.docx
+        
+# 3. GitHub for version-control, collaborating and archiving
+
+## Introduction to GitHub
+
+GitHub provides a place for you to back-up and version-control your R projects.
+
+- Interfaces directly with RStudio
+- Free (public repositories or with university email) or cheap (private repositories)
+- Facilitates collaboration with other co-authors (or the public)
+- Can go back to previous code versions (version-control aspect)
+
+Once you're up and running, it's (usually) simple to use!
+
+## Introduction to GitHub
+
+\centering
+\includegraphics[width=3.3in]{images/github_quote2.png}
+\centering
+\pause
+
+\centering
+\includegraphics[width=3.3in]{images/github_quote1.png}
+\centering
+        
+## GitHub Overview
+
+\includegraphics[width=4.5in]{images/github_overview_presi.png}
+        
+## Activity 4: GitHub in RStudio
+
+First, we will use the built-in interface for GitHub within RStudio. 
+
+Secondly, we will use the most common git commands in shell. \pause
+
+```{r shell, eval=F,echo=T}
+git pull origin master # To pull
+git add data # add files to a commit
+git commit -m "commit message here" #commit
+git push origin master # To push commit(s)
+```
+
+        
+Additional GitHub Tips
+
+- Don't use github with large files (push limit of 100MB, warning >50MB)
+    - If necessary, use git-large-file add on (advanced!)
+- Create new projects in GitHub first, then sync them with RStudio (File > New Project > Version Control > Git)
+
+## Thanks!
+
+We can use your feedback for the workshop at TWS. Please take a moment or two to fill out our survey.
+
+<https://docs.google.com/forms/d/e/1FAIpQLSdmvePcbb3wztx2JpJUhgTqpjvbR0z3etpnjGrRSRfTBnLpcQ/viewform?usp=sf_link>
+
+\centering
+\includegraphics[width=3.5in]{images/git_commit.png}
+\centering
+
+## Additional resources
+
+- <https://swcarpentry.github.io/r-novice-gapminder/02-project-intro/>
+
+- knitr documentation and help
+<https://yihui.name/knitr/>
+
+- Markdown basics 
+<https://daringfireball.net/projects/markdown/basics>
+
+- R-Oxygen formatting/tips <https://rpubs.com/alobo/spintutorial>
+
+- Online Reproducible Research Course
+<http://eriqande.github.io/rep-res-web/>
